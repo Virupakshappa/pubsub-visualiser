@@ -1,8 +1,12 @@
 using System.Text.Json;
 using System.Threading.Channels;
 using MessagePipe;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using PubSubVisualiser.Api.Services;
 using PubSubVisualiser.Api.Services.Messaging;
+using PubSubVisualiser.Api.Services.Observability;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,6 +44,26 @@ switch (busProvider.ToLowerInvariant())
 }
 
 builder.Services.AddSingleton<Config>();
+builder.Services.AddSingleton<Telemetry>();
+
+// OpenTelemetry: custom metrics (scraped at /metrics) + ASP.NET Core / runtime metrics,
+// and traces exported via OTLP when an endpoint is configured (e.g. Jaeger).
+var otlpEndpoint = builder.Configuration["Otlp:Endpoint"];
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(r => r.AddService(Telemetry.ServiceName))
+    .WithMetrics(metrics => metrics
+        .AddMeter(Telemetry.ServiceName)
+        .AddAspNetCoreInstrumentation()
+        .AddRuntimeInstrumentation()
+        .AddPrometheusExporter())
+    .WithTracing(tracing =>
+    {
+        tracing
+            .AddSource(Telemetry.ServiceName)
+            .AddAspNetCoreInstrumentation();
+        if (!string.IsNullOrWhiteSpace(otlpEndpoint))
+            tracing.AddOtlpExporter(o => o.Endpoint = new Uri(otlpEndpoint));
+    });
 
 var publisherDefs = new (string Name, string EventName, Func<string> Generate)[]
 {
@@ -53,6 +77,7 @@ foreach (var (name, eventName, generate) in publisherDefs)
 {
     builder.Services.AddSingleton(sp => new Publisher(
         sp.GetRequiredService<IMessageBus>(),
+        sp.GetRequiredService<Telemetry>(),
         name, eventName, generate));
 }
 
@@ -72,6 +97,7 @@ foreach (var def in subscriberDefs)
     builder.Services.AddSingleton<IHostedService>(sp => new Subscriber(
         sp.GetRequiredService<IMessageBus>(),
         sp.GetRequiredService<Config>(),
+        sp.GetRequiredService<Telemetry>(),
         captured.Name, captured.EventNames, captured.ConsumedEventName));
 }
 
@@ -83,6 +109,9 @@ builder.Services.AddSingleton<IHostedService>(sp => sp.GetRequiredService<ChaosS
 
 var app = builder.Build();
 app.UseCors();
+
+// Prometheus scrape target at /metrics.
+app.MapPrometheusScrapingEndpoint();
 
 var jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
@@ -164,11 +193,14 @@ var sseRoutes = new (string EventName, string Side, string Actor)[]
 app.MapGet("/events", async (
     HttpContext ctx,
     IMessageBus bus,
+    Telemetry telemetry,
     CancellationToken ct) =>
 {
     ctx.Response.Headers.Append("Content-Type", "text/event-stream");
     ctx.Response.Headers.Append("Cache-Control", "no-cache");
     ctx.Response.Headers.Append("X-Accel-Buffering", "no");
+
+    telemetry.SseClients.Add(1);
 
     var queue = Channel.CreateBounded<SseEvent>(new BoundedChannelOptions(256)
     {
@@ -207,6 +239,7 @@ app.MapGet("/events", async (
     {
         foreach (var s in subscriptions) s.Dispose();
         queue.Writer.TryComplete();
+        telemetry.SseClients.Add(-1);
     }
 });
 

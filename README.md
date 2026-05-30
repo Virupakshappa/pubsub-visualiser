@@ -103,6 +103,27 @@ backend to `Bus:Provider=kafka`. The same particle animation is now driven by a 
 broker. A [Kafka UI](http://localhost:8085) is included to inspect topics, partitions
 and messages.
 
+### Observability (metrics + traces)
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.observability.yml up --build
+```
+
+Adds Prometheus, Grafana, and Jaeger. Overlays compose, so combine with the Kafka
+overlay too (`-f docker-compose.kafka.yml`) to observe a real broker.
+
+| Tool | URL | What |
+|------|-----|------|
+| Grafana | <http://localhost:3000> (`admin`/`admin`) | Pre-provisioned **Pub/Sub Visualiser** dashboard |
+| Prometheus | <http://localhost:9090> | Scrapes the backend's `/metrics` |
+| Jaeger | <http://localhost:16686> | Publish→consume trace spans |
+
+The backend always exposes Prometheus metrics at **`/metrics`** (custom
+`pubsub_messages_published/consumed/failed/retries_total`, a processing-duration
+histogram, and an `pubsub_sse_clients` gauge — all tagged by actor) plus ASP.NET Core
+and .NET runtime metrics. Traces are emitted on the `PubSubVisualiser` activity source
+and exported via OTLP when `Otlp:Endpoint` is set (the overlay points it at Jaeger).
+
 ## Message transport
 
 The backend talks to its bus through a single `IMessageBus` seam

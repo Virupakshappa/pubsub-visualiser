@@ -1,0 +1,56 @@
+# Observability overlay for the Pub/Sub Visualiser (version/docker, Phase 3).
+# Adds Prometheus (metrics), Grafana (dashboards), and Jaeger (traces), and points
+# the backend's OTLP trace exporter at Jaeger.
+#
+# Usage (in-process bus + observability):
+#   docker compose -f docker-compose.yml -f docker-compose.observability.yml up --build
+#
+# Stack with a real broker too:
+#   docker compose -f docker-compose.yml -f docker-compose.kafka.yml \
+#                  -f docker-compose.observability.yml up --build
+#
+#   App:        http://localhost:8080
+#   Grafana:    http://localhost:3000   (admin / admin)
+#   Prometheus: http://localhost:9090
+#   Jaeger UI:  http://localhost:16686
+
+services:
+  backend:
+    environment:
+      # Export traces to Jaeger's OTLP gRPC receiver.
+      Otlp__Endpoint: http://jaeger:4317
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./ops/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    networks:
+      - pubsub
+
+  grafana:
+    image: grafana/grafana:11.2.0
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ./ops/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./ops/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+    networks:
+      - pubsub
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.60
+    ports:
+      - "16686:16686"  # UI
+      - "4317:4317"     # OTLP gRPC
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    networks:
+      - pubsub
