@@ -1,0 +1,6 @@
+@PubSubVisualiser.Api_HostAddress = http://localhost:5191
+
+GET {{PubSubVisualiser.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

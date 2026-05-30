@@ -1,0 +1,21 @@
+{
+  "folders": [
+    { "name": "backend",  "path": "backend" },
+    { "name": "frontend", "path": "frontend" }
+  ],
+  "settings": {
+    "files.exclude": {
+      "**/bin": true,
+      "**/obj": true,
+      "**/node_modules": true
+    },
+    "dotnetAcquisitionExtension.installTimeoutValue": 1800
+  },
+  "extensions": {
+    "recommendations": [
+      "ms-dotnettools.csdevkit",
+      "ms-dotnettools.csharp",
+      "dbaeumer.vscode-eslint"
+    ]
+  }
+}
