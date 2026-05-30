@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches: [main, "version/**"]
+  pull_request:
+    branches: [main, "version/**"]
+
+jobs:
+  backend:
+    name: Backend (.NET)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore -c Release
+
+      - name: Smoke test (in-process bus)
+        env:
+          ASPNETCORE_URLS: http://localhost:5080
+          Bus__Provider: inprocess
+        run: |
+          dotnet run -c Release --no-launch-profile &
+          APP_PID=$!
+          trap 'kill $APP_PID 2>/dev/null || true' EXIT
+
+          # Wait for the API to come up.
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:5080/actors >/dev/null && break || sleep 1
+          done
+          curl -sf http://localhost:5080/actors | grep -q DeadLetterQueue
+
+          # Generate load, then assert custom metrics are exported.
+          for i in $(seq 1 5); do curl -sf -X POST http://localhost:5080/publish-all >/dev/null; done
+          for i in $(seq 1 15); do
+            curl -sf http://localhost:5080/metrics | grep -q pubsub_messages_published_total && break || sleep 1
+          done
+          curl -sf http://localhost:5080/metrics | grep -q pubsub_messages_published_total
+
+  frontend:
+    name: Frontend (React)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
