@@ -30,10 +30,10 @@ switch (busProvider.ToLowerInvariant())
         builder.Services.AddSingleton<IMessageBus, InProcessMessageBus>();
         break;
     case "kafka":
-        // Phase 1 seam: a KafkaMessageBus (Confluent.Kafka) will register here so the
-        // same visualiser renders a real broker. Not wired up in this foundation pass.
-        throw new NotImplementedException(
-            "Bus:Provider 'kafka' is not implemented yet (planned for the version/docker Kafka phase).");
+        // Real broker: the same visualiser, backed by Apache Kafka. Configure via
+        // Kafka:BootstrapServers and Kafka:TopicPrefix.
+        builder.Services.AddSingleton<IMessageBus, KafkaMessageBus>();
+        break;
     default:
         throw new InvalidOperationException(
             $"Unknown Bus:Provider '{busProvider}'. Supported: inprocess, kafka.");

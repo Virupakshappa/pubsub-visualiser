@@ -92,6 +92,17 @@ Then open <http://localhost:8080> (the API is published on `localhost:5080`). Th
 backend and frontend each build from their own multi-stage `Dockerfile`; the frontend
 is served by nginx with the API URL baked in via the `VITE_API_URL` build arg.
 
+### Run against a real Kafka broker
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.kafka.yml up --build
+```
+
+This adds a single-node Kafka broker (KRaft mode — no ZooKeeper) and switches the
+backend to `Bus:Provider=kafka`. The same particle animation is now driven by a real
+broker. A [Kafka UI](http://localhost:8085) is included to inspect topics, partitions
+and messages.
+
 ## Message transport
 
 The backend talks to its bus through a single `IMessageBus` seam
@@ -101,10 +112,13 @@ The backend talks to its bus through a single `IMessageBus` seam
 | Provider | Status | Notes |
 |----------|--------|-------|
 | `inprocess` *(default)* | ✅ | MessagePipe in-process bus — no network, no durability |
-| `kafka` | 🚧 planned | Real broker adapter (Confluent.Kafka); same particles, real topics |
+| `kafka` | ✅ | Real broker adapter ([Confluent.Kafka](https://github.com/confluentinc/confluent-kafka-dotnet)); event names → topics, JSON payloads |
 
 Publishers, subscribers, and the SSE endpoint all depend only on `IMessageBus`, so
-swapping the transport doesn't touch the visualiser.
+swapping the transport doesn't touch the visualiser. The Kafka adapter gives each
+subscription its own consumer group, so every subscriber receives every message
+(broadcast fan-out matching the in-process bus). Configure with `Kafka:BootstrapServers`
+and `Kafka:TopicPrefix`.
 
 ## Branches
 
