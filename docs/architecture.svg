@@ -1,0 +1,259 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1280 644" width="1280" height="644" role="img" aria-label="Animated pub/sub architecture diagram">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b1120"/><stop offset="100%" stop-color="#131a2e"/>
+    </linearGradient>
+    <linearGradient id="busg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1e293b"/><stop offset="50%" stop-color="#273449"/><stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+    <filter id="blur" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="7"/></filter>
+    <style>
+      text { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+      .t  { font-weight: 600; font-size: 13px; fill: #f1f5f9; }
+      .s  { font-weight: 500; font-size: 10.5px; font-family: ui-monospace, Menlo, monospace; }
+      .pl { font-weight: 700; font-size: 11px; letter-spacing: .16em; }
+      .bl { font-weight: 800; font-size: 15px; letter-spacing: .22em; fill: #e2e8f0; }
+      .flow { stroke-linecap: round; stroke-dasharray: 4 10; animation: dash linear infinite; }
+      @keyframes dash { to { stroke-dashoffset: -560; } }
+      .glow { animation: pulse ease-in-out infinite; }
+      @keyframes pulse { 0%,100% { opacity: .30; } 50% { opacity: .72; } }
+      @media (prefers-reduced-motion: reduce) { .flow, .glow { animation: none; } }
+    </style>
+  </defs>
+
+  <rect x="0" y="0" width="1280" height="644" fill="url(#bg)" rx="16"/>
+
+  
+  <g>
+    <rect x="4" y="28" width="184" height="588" rx="14" fill="#a78bfa" opacity="0.04" stroke="#a78bfa" stroke-opacity="0.15"/>
+    <text class="pl" x="96" y="46" text-anchor="middle" fill="#a78bfa" opacity="0.65">BROWSER</text>
+  </g>
+  <g>
+    <rect x="240" y="28" width="184" height="588" rx="14" fill="#38bdf8" opacity="0.04" stroke="#38bdf8" stroke-opacity="0.15"/>
+    <text class="pl" x="332" y="46" text-anchor="middle" fill="#38bdf8" opacity="0.65">ASP.NET CORE</text>
+  </g>
+  <g>
+    <rect x="464" y="28" width="208" height="588" rx="14" fill="#3b82f6" opacity="0.04" stroke="#3b82f6" stroke-opacity="0.15"/>
+    <text class="pl" x="568" y="46" text-anchor="middle" fill="#3b82f6" opacity="0.65">PUBLISHERS</text>
+  </g>
+  <g>
+    <rect x="768" y="28" width="152" height="588" rx="14" fill="#34d399" opacity="0.04" stroke="#34d399" stroke-opacity="0.15"/>
+    
+  </g>
+  <g>
+    <rect x="962" y="28" width="232" height="588" rx="14" fill="#34d399" opacity="0.04" stroke="#34d399" stroke-opacity="0.15"/>
+    <text class="pl" x="1078" y="46" text-anchor="middle" fill="#34d399" opacity="0.65">SUBSCRIBERS</text>
+  </g>
+
+  <g fill="none">
+    <path d="M 171 299 C 214 299, 214 280, 257 280" stroke="#38bdf8" stroke-opacity="0.16" stroke-width="2"/>
+    <path d="M 257 364 C 214 364, 214 345, 171 345" stroke="#a78bfa" stroke-opacity="0.16" stroke-width="2"/>
+    <path d="M 407 280 C 447 280, 439 98, 479 98" stroke="#38bdf8" stroke-opacity="0.16" stroke-width="2"/>
+    <path d="M 407 280 C 447 280, 439 262, 479 262" stroke="#38bdf8" stroke-opacity="0.16" stroke-width="2"/>
+    <path d="M 407 280 C 447 280, 439 426, 479 426" stroke="#38bdf8" stroke-opacity="0.16" stroke-width="2"/>
+    <path d="M 407 280 C 447 280, 439 590, 479 590" stroke="#38bdf8" stroke-opacity="0.16" stroke-width="2"/>
+    <path d="M 568 56 C 568 86, 568 41, 568 71" stroke="#fb923c" stroke-opacity="0.16" stroke-width="2"/>
+    <path d="M 568 56 C 568 145.5, 568 145.5, 568 235" stroke="#fb923c" stroke-opacity="0.16" stroke-width="2"/>
+    <path d="M 568 56 C 568 227.5, 568 227.5, 568 399" stroke="#fb923c" stroke-opacity="0.16" stroke-width="2"/>
+    <path d="M 568 56 C 568 309.5, 568 309.5, 568 563" stroke="#fb923c" stroke-opacity="0.16" stroke-width="2"/>
+    <path d="M 657 98 C 721.5 98, 721.5 98, 786 98" stroke="#3b82f6" stroke-opacity="0.16" stroke-width="2"/>
+    <path d="M 657 262 C 721.5 262, 721.5 262, 786 262" stroke="#8b5cf6" stroke-opacity="0.16" stroke-width="2"/>
+    <path d="M 657 426 C 721.5 426, 721.5 426, 786 426" stroke="#ec4899" stroke-opacity="0.16" stroke-width="2"/>
+    <path d="M 657 590 C 721.5 590, 721.5 588, 786 588" stroke="#f59e0b" stroke-opacity="0.16" stroke-width="2"/>
+    <path d="M 902 72 C 942 72, 938 64, 978 64" stroke="#34d399" stroke-opacity="0.16" stroke-width="2"/>
+    <path d="M 902 147 C 942 147, 938 147, 978 147" stroke="#34d399" stroke-opacity="0.16" stroke-width="2"/>
+    <path d="M 902 230 C 942 230, 938 230, 978 230" stroke="#34d399" stroke-opacity="0.16" stroke-width="2"/>
+    <path d="M 902 313 C 942 313, 938 313, 978 313" stroke="#34d399" stroke-opacity="0.16" stroke-width="2"/>
+    <path d="M 902 396 C 942 396, 938 396, 978 396" stroke="#34d399" stroke-opacity="0.16" stroke-width="2"/>
+    <path d="M 902 479 C 942 479, 938 479, 978 479" stroke="#34d399" stroke-opacity="0.16" stroke-width="2"/>
+    <path d="M 902 562 C 942 562, 938 562, 978 562" stroke="#34d399" stroke-opacity="0.16" stroke-width="2"/>
+    <path d="M 786 84 C 596.5 84, 596.5 364, 407 364" stroke="#a78bfa" stroke-opacity="0.16" stroke-width="2"/>
+    <path d="M 1078 594 C 1078 342, 1078 342, 1078 90" stroke="#64748b" stroke-opacity="0.16" stroke-width="2"/>
+    <path d="M 1078 594 C 1078 383.5, 1078 383.5, 1078 173" stroke="#64748b" stroke-opacity="0.16" stroke-width="2"/>
+    <path d="M 1078 594 C 1078 425, 1078 425, 1078 256" stroke="#64748b" stroke-opacity="0.16" stroke-width="2"/>
+    <path d="M 1078 594 C 1078 466.5, 1078 466.5, 1078 339" stroke="#64748b" stroke-opacity="0.16" stroke-width="2"/>
+    <path d="M 1078 594 C 1078 508, 1078 508, 1078 422" stroke="#64748b" stroke-opacity="0.16" stroke-width="2"/>
+    <path d="M 1078 594 C 1078 549.5, 1078 549.5, 1078 505" stroke="#64748b" stroke-opacity="0.16" stroke-width="2"/>
+    <path d="M 1078 594 C 1078 564, 1078 618, 1078 588" stroke="#64748b" stroke-opacity="0.16" stroke-width="2"/>
+    <path d="M 171 299 C 214 299, 214 280, 257 280" class="flow" stroke="#38bdf8" stroke-width="2.4" style="animation-duration:1.4s"/>
+    <path d="M 257 364 C 214 364, 214 345, 171 345" class="flow" stroke="#a78bfa" stroke-width="2.4" style="animation-duration:1.6s"/>
+    <path d="M 407 280 C 447 280, 439 98, 479 98" class="flow" stroke="#38bdf8" stroke-width="2.4" style="animation-duration:1.5s"/>
+    <path d="M 407 280 C 447 280, 439 262, 479 262" class="flow" stroke="#38bdf8" stroke-width="2.4" style="animation-duration:1.6s"/>
+    <path d="M 407 280 C 447 280, 439 426, 479 426" class="flow" stroke="#38bdf8" stroke-width="2.4" style="animation-duration:1.7s"/>
+    <path d="M 407 280 C 447 280, 439 590, 479 590" class="flow" stroke="#38bdf8" stroke-width="2.4" style="animation-duration:1.8s"/>
+    <path d="M 568 56 C 568 86, 568 41, 568 71" class="flow" stroke="#fb923c" stroke-width="2.4" style="animation-duration:1.9s"/>
+    <path d="M 568 56 C 568 145.5, 568 145.5, 568 235" class="flow" stroke="#fb923c" stroke-width="2.4" style="animation-duration:2.02s"/>
+    <path d="M 568 56 C 568 227.5, 568 227.5, 568 399" class="flow" stroke="#fb923c" stroke-width="2.4" style="animation-duration:2.14s"/>
+    <path d="M 568 56 C 568 309.5, 568 309.5, 568 563" class="flow" stroke="#fb923c" stroke-width="2.4" style="animation-duration:2.26s"/>
+    <path d="M 657 98 C 721.5 98, 721.5 98, 786 98" class="flow" stroke="#3b82f6" stroke-width="2.4" style="animation-duration:1.1s"/>
+    <path d="M 657 262 C 721.5 262, 721.5 262, 786 262" class="flow" stroke="#8b5cf6" stroke-width="2.4" style="animation-duration:1.18s"/>
+    <path d="M 657 426 C 721.5 426, 721.5 426, 786 426" class="flow" stroke="#ec4899" stroke-width="2.4" style="animation-duration:1.26s"/>
+    <path d="M 657 590 C 721.5 590, 721.5 588, 786 588" class="flow" stroke="#f59e0b" stroke-width="2.4" style="animation-duration:1.34s"/>
+    <path d="M 902 72 C 942 72, 938 64, 978 64" class="flow" stroke="#34d399" stroke-width="2.4" style="animation-duration:1.3s"/>
+    <path d="M 902 147 C 942 147, 938 147, 978 147" class="flow" stroke="#34d399" stroke-width="2.4" style="animation-duration:1.37s"/>
+    <path d="M 902 230 C 942 230, 938 230, 978 230" class="flow" stroke="#34d399" stroke-width="2.4" style="animation-duration:1.44s"/>
+    <path d="M 902 313 C 942 313, 938 313, 978 313" class="flow" stroke="#34d399" stroke-width="2.4" style="animation-duration:1.51s"/>
+    <path d="M 902 396 C 942 396, 938 396, 978 396" class="flow" stroke="#34d399" stroke-width="2.4" style="animation-duration:1.58s"/>
+    <path d="M 902 479 C 942 479, 938 479, 978 479" class="flow" stroke="#34d399" stroke-width="2.4" style="animation-duration:1.65s"/>
+    <path d="M 902 562 C 942 562, 938 562, 978 562" class="flow" stroke="#34d399" stroke-width="2.4" style="animation-duration:1.72s"/>
+    <path d="M 786 84 C 596.5 84, 596.5 364, 407 364" class="flow" stroke="#a78bfa" stroke-width="2.4" style="animation-duration:1.7s"/>
+    <path d="M 1078 594 C 1078 342, 1078 342, 1078 90" class="flow" stroke="#64748b" stroke-width="2.4" style="animation-duration:2.4s"/>
+    <path d="M 1078 594 C 1078 383.5, 1078 383.5, 1078 173" class="flow" stroke="#64748b" stroke-width="2.4" style="animation-duration:2.5s"/>
+    <path d="M 1078 594 C 1078 425, 1078 425, 1078 256" class="flow" stroke="#64748b" stroke-width="2.4" style="animation-duration:2.6s"/>
+    <path d="M 1078 594 C 1078 466.5, 1078 466.5, 1078 339" class="flow" stroke="#64748b" stroke-width="2.4" style="animation-duration:2.7s"/>
+    <path d="M 1078 594 C 1078 508, 1078 508, 1078 422" class="flow" stroke="#64748b" stroke-width="2.4" style="animation-duration:2.8s"/>
+    <path d="M 1078 594 C 1078 549.5, 1078 549.5, 1078 505" class="flow" stroke="#64748b" stroke-width="2.4" style="animation-duration:2.9s"/>
+    <path d="M 1078 594 C 1078 564, 1078 618, 1078 588" class="flow" stroke="#64748b" stroke-width="2.4" style="animation-duration:3s"/>
+  </g>
+
+  <defs>
+    <path id="mp-fe-rest" d="M 171 299 C 214 299, 214 280, 257 280"/>
+    <path id="mp-sse-fe" d="M 257 364 C 214 364, 214 345, 171 345"/>
+    <path id="mp-pub-bus-0" d="M 657 98 C 721.5 98, 721.5 98, 786 98"/>
+    <path id="mp-pub-bus-1" d="M 657 262 C 721.5 262, 721.5 262, 786 262"/>
+    <path id="mp-pub-bus-2" d="M 657 426 C 721.5 426, 721.5 426, 786 426"/>
+    <path id="mp-pub-bus-3" d="M 657 590 C 721.5 590, 721.5 588, 786 588"/>
+    <path id="mp-bus-sub-0" d="M 902 72 C 942 72, 938 64, 978 64"/>
+    <path id="mp-bus-sub-1" d="M 902 147 C 942 147, 938 147, 978 147"/>
+    <path id="mp-bus-sub-2" d="M 902 230 C 942 230, 938 230, 978 230"/>
+    <path id="mp-bus-sub-3" d="M 902 313 C 942 313, 938 313, 978 313"/>
+    <path id="mp-bus-sub-4" d="M 902 396 C 942 396, 938 396, 978 396"/>
+    <path id="mp-bus-sub-5" d="M 902 479 C 942 479, 938 479, 978 479"/>
+    <path id="mp-bus-sub-6" d="M 902 562 C 942 562, 938 562, 978 562"/>
+  </defs>
+
+  <circle r="4.5" fill="#38bdf8"><animateMotion dur="1.7s" begin="0s" repeatCount="indefinite" rotate="auto"><mpath xlink:href="#mp-fe-rest" href="#mp-fe-rest"/></animateMotion></circle>
+  <circle r="4.5" fill="#a78bfa"><animateMotion dur="2s" begin="0s" repeatCount="indefinite" rotate="auto"><mpath xlink:href="#mp-sse-fe" href="#mp-sse-fe"/></animateMotion></circle>
+  <circle r="4.5" fill="#a78bfa"><animateMotion dur="2s" begin="-1s" repeatCount="indefinite" rotate="auto"><mpath xlink:href="#mp-sse-fe" href="#mp-sse-fe"/></animateMotion></circle>
+  <circle r="4.5" fill="#3b82f6"><animateMotion dur="1.5s" begin="0s" repeatCount="indefinite" rotate="auto"><mpath xlink:href="#mp-pub-bus-0" href="#mp-pub-bus-0"/></animateMotion></circle>
+  <circle r="4.5" fill="#8b5cf6"><animateMotion dur="1.62s" begin="0s" repeatCount="indefinite" rotate="auto"><mpath xlink:href="#mp-pub-bus-1" href="#mp-pub-bus-1"/></animateMotion></circle>
+  <circle r="4.5" fill="#ec4899"><animateMotion dur="1.74s" begin="0s" repeatCount="indefinite" rotate="auto"><mpath xlink:href="#mp-pub-bus-2" href="#mp-pub-bus-2"/></animateMotion></circle>
+  <circle r="4.5" fill="#f59e0b"><animateMotion dur="1.86s" begin="0s" repeatCount="indefinite" rotate="auto"><mpath xlink:href="#mp-pub-bus-3" href="#mp-pub-bus-3"/></animateMotion></circle>
+  <circle r="4.5" fill="#34d399"><animateMotion dur="1.7s" begin="0s" repeatCount="indefinite" rotate="auto"><mpath xlink:href="#mp-bus-sub-0" href="#mp-bus-sub-0"/></animateMotion></circle>
+  <circle r="4.5" fill="#34d399"><animateMotion dur="1.8s" begin="0s" repeatCount="indefinite" rotate="auto"><mpath xlink:href="#mp-bus-sub-1" href="#mp-bus-sub-1"/></animateMotion></circle>
+  <circle r="4.5" fill="#34d399"><animateMotion dur="1.9s" begin="0s" repeatCount="indefinite" rotate="auto"><mpath xlink:href="#mp-bus-sub-2" href="#mp-bus-sub-2"/></animateMotion></circle>
+  <circle r="4.5" fill="#34d399"><animateMotion dur="2s" begin="0s" repeatCount="indefinite" rotate="auto"><mpath xlink:href="#mp-bus-sub-3" href="#mp-bus-sub-3"/></animateMotion></circle>
+  <circle r="4.5" fill="#34d399"><animateMotion dur="2.1s" begin="0s" repeatCount="indefinite" rotate="auto"><mpath xlink:href="#mp-bus-sub-4" href="#mp-bus-sub-4"/></animateMotion></circle>
+  <circle r="4.5" fill="#34d399"><animateMotion dur="2.2s" begin="0s" repeatCount="indefinite" rotate="auto"><mpath xlink:href="#mp-bus-sub-5" href="#mp-bus-sub-5"/></animateMotion></circle>
+  <circle r="4.5" fill="#34d399"><animateMotion dur="2.3s" begin="0s" repeatCount="indefinite" rotate="auto"><mpath xlink:href="#mp-bus-sub-6" href="#mp-bus-sub-6"/></animateMotion></circle>
+
+  <g>
+    <rect x="783" y="55" width="122" height="550" rx="22" fill="#34d399" class="glow" filter="url(#blur)" style="animation-duration:2.6s"/>
+    <rect x="786" y="58" width="116" height="544" rx="20" fill="url(#busg)" stroke="#34d399" stroke-opacity="0.55" stroke-width="1.5"/>
+    <text class="bl" transform="translate(844 330) rotate(-90)" text-anchor="middle" dominant-baseline="central">MESSAGEPIPE BUS</text>
+  </g>
+
+  
+    <g>
+      <rect x="19" y="274" width="154" height="96" rx="13" fill="#a78bfa" class="glow" filter="url(#blur)" style="animation-duration:2.2s"/>
+      <rect x="21" y="276" width="150" height="92" rx="11" fill="#0f1729" stroke="#a78bfa" stroke-width="1.6" stroke-opacity="0.85"/>
+      <rect x="21" y="276" width="4" height="92" rx="2" fill="#a78bfa"/>
+      <text class="t" x="96" y="316" text-anchor="middle" dominant-baseline="central">React UI</text>
+      <text class="s" x="96" y="333" text-anchor="middle" dominant-baseline="central" fill="#a78bfa">particles · wiring</text>
+    </g>
+    <g>
+      <rect x="255" y="250" width="154" height="60" rx="13" fill="#38bdf8" class="glow" filter="url(#blur)" style="animation-duration:2.38s"/>
+      <rect x="257" y="252" width="150" height="56" rx="11" fill="#0f1729" stroke="#38bdf8" stroke-width="1.6" stroke-opacity="0.85"/>
+      <rect x="257" y="252" width="4" height="56" rx="2" fill="#38bdf8"/>
+      <text class="t" x="332" y="274" text-anchor="middle" dominant-baseline="central">REST API</text>
+      <text class="s" x="332" y="291" text-anchor="middle" dominant-baseline="central" fill="#38bdf8">/publish · /config</text>
+    </g>
+    <g>
+      <rect x="255" y="334" width="154" height="60" rx="13" fill="#a78bfa" class="glow" filter="url(#blur)" style="animation-duration:2.56s"/>
+      <rect x="257" y="336" width="150" height="56" rx="11" fill="#0f1729" stroke="#a78bfa" stroke-width="1.6" stroke-opacity="0.85"/>
+      <rect x="257" y="336" width="4" height="56" rx="2" fill="#a78bfa"/>
+      <text class="t" x="332" y="358" text-anchor="middle" dominant-baseline="central">SSE /events</text>
+      <text class="s" x="332" y="375" text-anchor="middle" dominant-baseline="central" fill="#a78bfa">live stream</text>
+    </g>
+    <g>
+      <rect x="488" y="12" width="160" height="46" rx="13" fill="#fb923c" class="glow" filter="url(#blur)" style="animation-duration:2.74s"/>
+      <rect x="490" y="14" width="156" height="42" rx="11" fill="#0f1729" stroke="#fb923c" stroke-width="1.6" stroke-opacity="0.85"/>
+      <rect x="490" y="14" width="4" height="42" rx="2" fill="#fb923c"/>
+      <text class="t" x="568" y="29" text-anchor="middle" dominant-baseline="central">ChaosService</text>
+      <text class="s" x="568" y="46" text-anchor="middle" dominant-baseline="central" fill="#fb923c">auto-fire</text>
+    </g>
+    <g>
+      <rect x="1001" y="592" width="154" height="44" rx="13" fill="#64748b" class="glow" filter="url(#blur)" style="animation-duration:2.92s"/>
+      <rect x="1003" y="594" width="150" height="40" rx="11" fill="#0f1729" stroke="#64748b" stroke-width="1.6" stroke-opacity="0.85"/>
+      <rect x="1003" y="594" width="4" height="40" rx="2" fill="#64748b"/>
+      <text class="t" x="1078" y="608" text-anchor="middle" dominant-baseline="central">Config</text>
+      <text class="s" x="1078" y="625" text-anchor="middle" dominant-baseline="central" fill="#64748b">subscriberDelayMs</text>
+    </g>
+    <g>
+      <rect x="477" y="69" width="182" height="58" rx="13" fill="#3b82f6" class="glow" filter="url(#blur)" style="animation-duration:3.1s"/>
+      <rect x="479" y="71" width="178" height="54" rx="11" fill="#0f1729" stroke="#3b82f6" stroke-width="1.6" stroke-opacity="0.85"/>
+      <rect x="479" y="71" width="4" height="54" rx="2" fill="#3b82f6"/>
+      <text class="t" x="568" y="92" text-anchor="middle" dominant-baseline="central">Number</text>
+      <text class="s" x="568" y="109" text-anchor="middle" dominant-baseline="central" fill="#3b82f6">randomNumber</text>
+    </g>
+    <g>
+      <rect x="477" y="233" width="182" height="58" rx="13" fill="#8b5cf6" class="glow" filter="url(#blur)" style="animation-duration:3.28s"/>
+      <rect x="479" y="235" width="178" height="54" rx="11" fill="#0f1729" stroke="#8b5cf6" stroke-width="1.6" stroke-opacity="0.85"/>
+      <rect x="479" y="235" width="4" height="54" rx="2" fill="#8b5cf6"/>
+      <text class="t" x="568" y="256" text-anchor="middle" dominant-baseline="central">Alphabet</text>
+      <text class="s" x="568" y="273" text-anchor="middle" dominant-baseline="central" fill="#8b5cf6">randomAlphabet</text>
+    </g>
+    <g>
+      <rect x="477" y="397" width="182" height="58" rx="13" fill="#ec4899" class="glow" filter="url(#blur)" style="animation-duration:2.2s"/>
+      <rect x="479" y="399" width="178" height="54" rx="11" fill="#0f1729" stroke="#ec4899" stroke-width="1.6" stroke-opacity="0.85"/>
+      <rect x="479" y="399" width="4" height="54" rx="2" fill="#ec4899"/>
+      <text class="t" x="568" y="420" text-anchor="middle" dominant-baseline="central">Color</text>
+      <text class="s" x="568" y="437" text-anchor="middle" dominant-baseline="central" fill="#ec4899">randomColor</text>
+    </g>
+    <g>
+      <rect x="477" y="561" width="182" height="58" rx="13" fill="#f59e0b" class="glow" filter="url(#blur)" style="animation-duration:2.38s"/>
+      <rect x="479" y="563" width="178" height="54" rx="11" fill="#0f1729" stroke="#f59e0b" stroke-width="1.6" stroke-opacity="0.85"/>
+      <rect x="479" y="563" width="4" height="54" rx="2" fill="#f59e0b"/>
+      <text class="t" x="568" y="584" text-anchor="middle" dominant-baseline="central">Emoji</text>
+      <text class="s" x="568" y="601" text-anchor="middle" dominant-baseline="central" fill="#f59e0b">randomEmoji</text>
+    </g>
+    <g>
+      <rect x="976" y="36" width="204" height="56" rx="13" fill="#34d399" class="glow" filter="url(#blur)" style="animation-duration:2.56s"/>
+      <rect x="978" y="38" width="200" height="52" rx="11" fill="#0f1729" stroke="#34d399" stroke-width="1.6" stroke-opacity="0.85"/>
+      <rect x="978" y="38" width="4" height="52" rx="2" fill="#34d399"/>
+      <text class="t" x="1078" y="58" text-anchor="middle" dominant-baseline="central">Number</text>
+      <text class="s" x="1078" y="75" text-anchor="middle" dominant-baseline="central" fill="#34d399">randomNumber</text>
+    </g>
+    <g>
+      <rect x="976" y="119" width="204" height="56" rx="13" fill="#34d399" class="glow" filter="url(#blur)" style="animation-duration:2.74s"/>
+      <rect x="978" y="121" width="200" height="52" rx="11" fill="#0f1729" stroke="#34d399" stroke-width="1.6" stroke-opacity="0.85"/>
+      <rect x="978" y="121" width="4" height="52" rx="2" fill="#34d399"/>
+      <text class="t" x="1078" y="141" text-anchor="middle" dominant-baseline="central">Alphabet</text>
+      <text class="s" x="1078" y="158" text-anchor="middle" dominant-baseline="central" fill="#34d399">randomAlphabet</text>
+    </g>
+    <g>
+      <rect x="976" y="202" width="204" height="56" rx="13" fill="#34d399" class="glow" filter="url(#blur)" style="animation-duration:2.92s"/>
+      <rect x="978" y="204" width="200" height="52" rx="11" fill="#0f1729" stroke="#34d399" stroke-width="1.6" stroke-opacity="0.85"/>
+      <rect x="978" y="204" width="4" height="52" rx="2" fill="#34d399"/>
+      <text class="t" x="1078" y="224" text-anchor="middle" dominant-baseline="central">Color</text>
+      <text class="s" x="1078" y="241" text-anchor="middle" dominant-baseline="central" fill="#34d399">randomColor</text>
+    </g>
+    <g>
+      <rect x="976" y="285" width="204" height="56" rx="13" fill="#34d399" class="glow" filter="url(#blur)" style="animation-duration:3.1s"/>
+      <rect x="978" y="287" width="200" height="52" rx="11" fill="#0f1729" stroke="#34d399" stroke-width="1.6" stroke-opacity="0.85"/>
+      <rect x="978" y="287" width="4" height="52" rx="2" fill="#34d399"/>
+      <text class="t" x="1078" y="307" text-anchor="middle" dominant-baseline="central">Emoji</text>
+      <text class="s" x="1078" y="324" text-anchor="middle" dominant-baseline="central" fill="#34d399">randomEmoji</text>
+    </g>
+    <g>
+      <rect x="976" y="368" width="204" height="56" rx="13" fill="#34d399" class="glow" filter="url(#blur)" style="animation-duration:3.28s"/>
+      <rect x="978" y="370" width="200" height="52" rx="11" fill="#0f1729" stroke="#34d399" stroke-width="1.6" stroke-opacity="0.85"/>
+      <rect x="978" y="370" width="4" height="52" rx="2" fill="#34d399"/>
+      <text class="t" x="1078" y="390" text-anchor="middle" dominant-baseline="central">AnyEventLogger</text>
+      <text class="s" x="1078" y="407" text-anchor="middle" dominant-baseline="central" fill="#34d399">4 events</text>
+    </g>
+    <g>
+      <rect x="976" y="451" width="204" height="56" rx="13" fill="#34d399" class="glow" filter="url(#blur)" style="animation-duration:2.2s"/>
+      <rect x="978" y="453" width="200" height="52" rx="11" fill="#0f1729" stroke="#34d399" stroke-width="1.6" stroke-opacity="0.85"/>
+      <rect x="978" y="453" width="4" height="52" rx="2" fill="#34d399"/>
+      <text class="t" x="1078" y="473" text-anchor="middle" dominant-baseline="central">Alphanumeric</text>
+      <text class="s" x="1078" y="490" text-anchor="middle" dominant-baseline="central" fill="#34d399">2 events</text>
+    </g>
+    <g>
+      <rect x="976" y="534" width="204" height="56" rx="13" fill="#f87171" class="glow" filter="url(#blur)" style="animation-duration:2.38s"/>
+      <rect x="978" y="536" width="200" height="52" rx="11" fill="#0f1729" stroke="#f87171" stroke-width="1.6" stroke-opacity="0.85"/>
+      <rect x="978" y="536" width="4" height="52" rx="2" fill="#f87171"/>
+      <text class="t" x="1078" y="556" text-anchor="middle" dominant-baseline="central">Failing</text>
+      <text class="s" x="1078" y="573" text-anchor="middle" dominant-baseline="central" fill="#f87171">⚠ 30% fail</text>
+    </g>
+</svg>
