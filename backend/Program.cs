@@ -45,6 +45,7 @@ switch (busProvider.ToLowerInvariant())
 
 builder.Services.AddSingleton<Config>();
 builder.Services.AddSingleton<Telemetry>();
+builder.Services.AddSingleton<DeadLetterStore>();
 
 // OpenTelemetry: custom metrics (scraped at /metrics) + ASP.NET Core / runtime metrics,
 // and traces exported via OTLP when an endpoint is configured (e.g. Jaeger).
@@ -113,6 +114,10 @@ app.UseCors();
 // Prometheus scrape target at /metrics.
 app.MapPrometheusScrapingEndpoint();
 
+// Report dead-letter queue depth as a gauge.
+app.Services.GetRequiredService<Telemetry>()
+    .TrackDeadLetterQueue(() => app.Services.GetRequiredService<DeadLetterStore>().Count);
+
 var jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
 // /actors lists every publisher + every subscriber (including FailingSubscriber)
@@ -124,6 +129,7 @@ app.MapGet("/actors", (IEnumerable<Publisher> publishers, FailingSubscriber fail
     var subs = subscriberDefs
         .Select(s => new ActorInfo(s.Name, s.EventNames, IsFailing: false))
         .Append(new ActorInfo(failing.Name, failing.EventNames, IsFailing: true))
+        .Append(new ActorInfo("DeadLetterQueue", new[] { EventNames.DeadLetter }, IsFailing: false))
         .ToArray();
     return Results.Json(new { publishers = pubs, subscribers = subs }, jsonOptions);
 });
@@ -174,6 +180,26 @@ app.MapPost("/chaos/stop", (ChaosService chaos) =>
     return Results.Json(new { running = chaos.Running, intervalMs = chaos.IntervalMs }, jsonOptions);
 });
 
+// Dead-letter queue: inspect, replay, and clear messages that exhausted their retries.
+app.MapGet("/dead-letters", (DeadLetterStore dlq) =>
+    Results.Json(new { count = dlq.Count, items = dlq.All() }, jsonOptions));
+
+app.MapPost("/dead-letters/{id}/replay", async (
+    string id, DeadLetterStore dlq, IMessageBus bus, CancellationToken ct) =>
+{
+    var dl = dlq.Remove(id);
+    if (dl is null) return Results.NotFound();
+    // Re-publish the original event so it flows through the system again (and may fail again).
+    await bus.PublishAsync(dl.SourceEventName, new PubSubMessage(0, dl.Value), ct);
+    return Results.NoContent();
+});
+
+app.MapDelete("/dead-letters", (DeadLetterStore dlq) =>
+{
+    dlq.Clear();
+    return Results.NoContent();
+});
+
 // SSE routing
 var sseRoutes = new (string EventName, string Side, string Actor)[]
 {
@@ -188,6 +214,7 @@ var sseRoutes = new (string EventName, string Side, string Actor)[]
     (EventNames.AnyEventLogged,         "subscriber", "AnyEventLogger"),
     (EventNames.AlphanumericConsumed,   "subscriber", "AlphanumericSubscriber"),
     (EventNames.ChaoticConsumed,        "subscriber", "FailingSubscriber"),
+    (EventNames.DeadLetter,             "subscriber", "DeadLetterQueue"),
 };
 
 app.MapGet("/events", async (

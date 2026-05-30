@@ -12,6 +12,7 @@ public sealed class FailingSubscriber : IHostedService, IDisposable
     private readonly IMessageBus _bus;
     private readonly Config _config;
     private readonly Telemetry _telemetry;
+    private readonly DeadLetterStore _deadLetters;
     private readonly List<IDisposable> _subscriptions = new();
     private int _count;
 
@@ -25,11 +26,12 @@ public sealed class FailingSubscriber : IHostedService, IDisposable
     };
     public string ConsumedEventName { get; } = Services.EventNames.ChaoticConsumed;
 
-    public FailingSubscriber(IMessageBus bus, Config config, Telemetry telemetry)
+    public FailingSubscriber(IMessageBus bus, Config config, Telemetry telemetry, DeadLetterStore deadLetters)
     {
         _bus = bus;
         _config = config;
         _telemetry = telemetry;
+        _deadLetters = deadLetters;
     }
 
     public Task StartAsync(CancellationToken cancellationToken)
@@ -78,6 +80,15 @@ public sealed class FailingSubscriber : IHostedService, IDisposable
                         ConsumedEventName,
                         new PubSubMessage(failedCount, incoming.Value, sourceEventName, attempt, Failed: true),
                         ct);
+
+                    // Dead-letter the exhausted message: record it for replay and animate
+                    // a particle from here to the DeadLetterQueue actor.
+                    _deadLetters.Add(Name, sourceEventName, incoming.Value, attempt);
+                    await _bus.PublishAsync(
+                        Services.EventNames.DeadLetter,
+                        new PubSubMessage(failedCount, incoming.Value, sourceEventName, attempt, Failed: true),
+                        ct);
+
                     _telemetry.MessagesFailed.Add(1, tags);
                     activity?.SetStatus(ActivityStatusCode.Error, "exhausted retries");
                     return;

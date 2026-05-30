@@ -15,4 +15,5 @@ public static class EventNames
     public const string AnyEventLogged       = "anyEventLogged";
     public const string AlphanumericConsumed = "alphanumericConsumed";
     public const string ChaoticConsumed      = "chaoticConsumed";
+    public const string DeadLetter           = "deadLetter";
 }

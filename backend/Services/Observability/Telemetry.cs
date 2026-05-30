@@ -25,6 +25,10 @@ public sealed class Telemetry : IDisposable
     public Histogram<double> ProcessingDuration { get; }
     public UpDownCounter<long> SseClients { get; }
 
+#pragma warning disable IDE0052 // kept alive so the observable gauge keeps reporting
+    private ObservableGauge<long>? _deadLetterQueueDepth;
+#pragma warning restore IDE0052
+
     public Telemetry(IMeterFactory meterFactory)
     {
         _meter = meterFactory.Create(ServiceName);
@@ -52,6 +56,14 @@ public sealed class Telemetry : IDisposable
         SseClients = _meter.CreateUpDownCounter<long>(
             "pubsub.sse.clients", unit: "{client}",
             description: "Currently connected SSE clients.");
+    }
+
+    /// <summary>Register an observable gauge that reports the current dead-letter queue depth.</summary>
+    public void TrackDeadLetterQueue(Func<long> readDepth)
+    {
+        _deadLetterQueueDepth = _meter.CreateObservableGauge(
+            "pubsub.dead_letters.current", readDepth, unit: "{message}",
+            description: "Messages currently held in the dead-letter queue.");
     }
 
     public void Dispose()
