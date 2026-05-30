@@ -36,7 +36,10 @@ React UI ──▶ REST API ──▶ Publishers ──▶ ┌──────
 - 🧩 **Fan-out & multi-subscribe** — e.g. `AnyEventLogger` listens to all 4 events, `AlphanumericSubscriber` to 2.
 - 💥 **Chaos mode** — `ChaosService` auto-fires random publishers at a configurable interval.
 - ⚠️ **Failure simulation** — `FailingSubscriber` fails ~30% of the time with up to 3 retries, rendered with retry/failed badges.
+- ☠ **Dead-letter queue** — exhausted messages are dead-lettered to a `DeadLetterQueue` actor; inspect, **replay**, and clear them from the UI panel.
 - 🎚️ **Live config** — adjust subscriber processing delay from the UI and watch the animation speed respond.
+- 🔀 **Pluggable transport** — same visualiser over the in-process bus or a real Kafka broker via the `IMessageBus` seam.
+- 📊 **Observability** — OpenTelemetry metrics at `/metrics` (Prometheus) and OTLP traces, with Grafana/Jaeger overlays.
 - ⬡ **Animated architecture diagram** — a fully animated SVG view of the running system, baked into the app.
 
 ## Tech stack
@@ -159,6 +162,10 @@ and `Kafka:TopicPrefix`.
 | `GET` / `PUT` | `/config` | Read / set the subscriber processing delay (ms) |
 | `GET`  | `/chaos` | Chaos mode status |
 | `POST` | `/chaos/start` · `/chaos/stop` | Start / stop auto-firing |
+| `GET`  | `/dead-letters` | List dead-lettered messages (with count) |
+| `POST` | `/dead-letters/{id}/replay` | Replay one dead letter (re-publishes the original event) |
+| `DELETE` | `/dead-letters` | Clear the dead-letter queue |
+| `GET`  | `/metrics` | Prometheus metrics (custom + ASP.NET Core + runtime) |
 
 ## Regenerating the diagram
 

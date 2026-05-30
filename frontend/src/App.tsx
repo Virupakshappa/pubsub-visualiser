@@ -321,6 +321,8 @@ function App() {
         onChangeChaosInterval={onChangeChaosInterval}
       />
 
+      <DeadLetterPanel />
+
       <div className="publish-row">
         <button
           className="publish-btn primary"
@@ -520,6 +522,96 @@ function ActorCard({
         )}
       </ul>
     </div>
+  )
+}
+
+type DeadLetterItem = {
+  id: string
+  actor: string
+  sourceEventName: string
+  value: string
+  attempts: number
+  deadLetteredAt: string
+}
+
+function DeadLetterPanel() {
+  const [items, setItems] = useState<DeadLetterItem[]>([])
+  const [open, setOpen] = useState(false)
+
+  const load = useCallback(() => {
+    fetch(`${API}/dead-letters`)
+      .then((r) => r.json())
+      .then((d: { items: DeadLetterItem[] }) => setItems(d.items ?? []))
+      .catch(() => {})
+  }, [])
+
+  useEffect(() => {
+    load()
+    const id = window.setInterval(load, 1500)
+    return () => window.clearInterval(id)
+  }, [load])
+
+  const replay = async (dlId: string) => {
+    await fetch(`${API}/dead-letters/${dlId}/replay`, { method: 'POST' }).catch(() => {})
+    load()
+  }
+  const clearAll = async () => {
+    await fetch(`${API}/dead-letters`, { method: 'DELETE' }).catch(() => {})
+    load()
+  }
+
+  return (
+    <section className="dlq-panel" style={{ margin: '0.5rem 0' }}>
+      <button
+        className={`arch-toggle-btn ${open ? 'active' : ''}`}
+        onClick={() => setOpen((v) => !v)}
+        title="Dead-letter queue"
+      >
+        ☠ Dead-letters
+        <span
+          style={{
+            marginLeft: 8, padding: '0 8px', borderRadius: 10,
+            background: items.length ? '#ef4444' : '#374151', color: '#fff', fontSize: 12,
+          }}
+        >
+          {items.length}
+        </span>
+      </button>
+      {open && (
+        <div
+          style={{
+            marginTop: 8, padding: 12, border: '1px solid #374151',
+            borderRadius: 8, background: 'rgba(17,24,39,0.6)',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <strong>Dead-lettered messages</strong>
+            <button className="actor-publish-btn" onClick={clearAll} disabled={items.length === 0}>
+              Clear all
+            </button>
+          </div>
+          {items.length === 0 ? (
+            <p style={{ opacity: 0.6, margin: 0 }}>No dead-lettered messages — exhausted retries land here.</p>
+          ) : (
+            <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'grid', gap: 6, maxHeight: 220, overflowY: 'auto' }}>
+              {items.map((it) => (
+                <li
+                  key={it.id}
+                  style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '4px 8px', borderRadius: 6, background: 'rgba(239,68,68,0.08)' }}
+                >
+                  <span className={`event-chip event-chip-${eventTypeClass(it.sourceEventName)}`}>{it.sourceEventName}</span>
+                  <ValueDisplay value={it.value} eventName={it.sourceEventName} />
+                  <span style={{ color: '#f87171', fontSize: 12 }}>✗ {it.attempts}× from {it.actor}</span>
+                  <button className="actor-publish-btn" style={{ marginLeft: 'auto' }} onClick={() => replay(it.id)}>
+                    ↻ Replay
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+    </section>
   )
 }
 
