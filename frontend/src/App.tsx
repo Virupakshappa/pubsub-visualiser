@@ -3,8 +3,9 @@ import './App.css'
 import { useCardPositions } from './hooks/useCardPositions'
 import { ParticleLayer, type Particle } from './components/ParticleLayer'
 import { WiringLayer, type WiringEdge } from './components/WiringLayer'
-import { StatsBar, eventTypeClass } from './components/StatsBar'
+import { StatsBar } from './components/StatsBar'
 import { ArchitectureDiagram } from './components/ArchitectureDiagram'
+import { eventTypeClass } from './lib/eventStyles'
 
 const API = import.meta.env.VITE_API_URL ?? 'http://localhost:5080'
 const MAX_HISTORY = 8
@@ -75,7 +76,7 @@ function App() {
   const [chaos, setChaos] = useState({ running: false, intervalMs: 300 })
   const [particles, setParticles] = useState<Particle[]>([])
   const [edges, setEdges] = useState<WiringEdge[]>([])
-  const [now, setNow] = useState(Date.now())
+  const [now, setNow] = useState(() => Date.now())
   const [stats, setStats] = useState({ total: 0, perSecond: 0, byEvent: {} as Record<string, number> })
 
   const eventLogRef = useRef<{ timestamp: number }[]>([])
@@ -123,6 +124,53 @@ function App() {
     fetch(`${API}/config`).then((r) => r.json()).then(setConfig).catch(() => {})
     fetch(`${API}/chaos`).then((r) => r.json()).then(setChaos).catch(() => {})
   }, [])
+
+  // Spawn particles for a publisher event, fanning out to every listening subscriber.
+  // Declared before the SSE effect that calls it; reads live state via refs.
+  const spawnParticles = useCallback(
+    (ev: SseEvent) => {
+      // Lookup from card positions — use refs so we don't capture stale state
+      const positions = cards.positions
+      const from = positions[ev.actor]
+      if (!from) return
+      // Find all subscribers listening to this event
+      const targets: string[] = []
+      const allSubs = subscribersRef.current
+      for (const name in allSubs) {
+        if (allSubs[name].eventNames.includes(ev.eventName)) targets.push(name)
+      }
+      const dur = configRef.current.subscriberDelayMs
+      const bornAt = Date.now()
+      const newParticles: Particle[] = []
+      for (const target of targets) {
+        const to = positions[target]
+        if (!to) continue
+        newParticles.push({
+          id: `${ev.actor}-${target}-${ev.count}-${bornAt}-${Math.random().toString(36).slice(2, 6)}`,
+          fromX: from.centerX,
+          fromY: from.centerY,
+          toX: to.centerX,
+          toY: to.centerY,
+          color: colorFor(ev.eventName, ev.value),
+          emoji: ev.eventName === 'randomEmoji' ? ev.value : undefined,
+          durationMs: dur,
+          bornAt,
+        })
+      }
+      if (newParticles.length) {
+        setParticles((prev) => [...prev, ...newParticles])
+      }
+      // Pulse wiring edges from this publisher
+      setEdges((prev) =>
+        prev.map((e) =>
+          e.publisherName === ev.actor && e.eventName === ev.eventName
+            ? { ...e, lastFiredAt: bornAt }
+            : e,
+        ),
+      )
+    },
+    [cards.positions],
+  )
 
   // SSE
   useEffect(() => {
@@ -178,51 +226,6 @@ function App() {
     }, 200)
     return () => window.clearInterval(id)
   }, [])
-
-  const spawnParticles = useCallback(
-    (ev: SseEvent) => {
-      // Lookup from card positions — use refs so we don't capture stale state
-      const positions = cards.positions
-      const from = positions[ev.actor]
-      if (!from) return
-      // Find all subscribers listening to this event
-      const targets: string[] = []
-      const allSubs = subscribersRef.current
-      for (const name in allSubs) {
-        if (allSubs[name].eventNames.includes(ev.eventName)) targets.push(name)
-      }
-      const dur = configRef.current.subscriberDelayMs
-      const bornAt = Date.now()
-      const newParticles: Particle[] = []
-      for (const target of targets) {
-        const to = positions[target]
-        if (!to) continue
-        newParticles.push({
-          id: `${ev.actor}-${target}-${ev.count}-${bornAt}-${Math.random().toString(36).slice(2, 6)}`,
-          fromX: from.centerX,
-          fromY: from.centerY,
-          toX: to.centerX,
-          toY: to.centerY,
-          color: colorFor(ev.eventName, ev.value),
-          emoji: ev.eventName === 'randomEmoji' ? ev.value : undefined,
-          durationMs: dur,
-          bornAt,
-        })
-      }
-      if (newParticles.length) {
-        setParticles((prev) => [...prev, ...newParticles])
-      }
-      // Pulse wiring edges from this publisher
-      setEdges((prev) =>
-        prev.map((e) =>
-          e.publisherName === ev.actor && e.eventName === ev.eventName
-            ? { ...e, lastFiredAt: bornAt }
-            : e,
-        ),
-      )
-    },
-    [cards.positions],
-  )
 
   const removeParticle = useCallback((id: string) => {
     setParticles((prev) => prev.filter((p) => p.id !== id))
@@ -434,26 +437,30 @@ function ActorCard({
 }) {
   const isMulti = actor.eventNames.length > 1
   const isFailing = actor.isFailing === true
-  const cardRef = useCallback(register(actor.name), [register, actor.name])
+  const cardRef = useMemo(() => register(actor.name), [register, actor.name])
   const [pulseKey, setPulseKey] = useState(0)
-  const [floater, setFloater] = useState<{ id: number; value: string; eventName: string } | null>(null)
+  const [floater, setFloater] = useState<{ id: string; value: string; eventName: string } | null>(null)
   const latestMsg = actor.messages[0]
   const latestSig = latestMsg ? `${latestMsg.count}-${latestMsg.timestamp}` : ''
-  const lastSigRef = useRef('')
+  const [lastSig, setLastSig] = useState('')
 
-  useEffect(() => {
-    if (latestMsg && latestSig !== lastSigRef.current) {
-      lastSigRef.current = latestSig
-      setPulseKey((k) => k + 1)
-      if (accent === 'pub') {
-        const id = Date.now() + Math.random()
-        setFloater({ id, value: latestMsg.value, eventName: latestMsg.eventName })
-        window.setTimeout(() => {
-          setFloater((f) => (f && f.id === id ? null : f))
-        }, 800)
-      }
+  // When a new message arrives, pulse the card and (for publishers) show a transient
+  // floating value. Detected during render via the "previous value" pattern — tracking the
+  // last seen signature in state and using it as a stable id — so we avoid setState in an effect.
+  if (latestMsg && latestSig !== lastSig) {
+    setLastSig(latestSig)
+    setPulseKey((k) => k + 1)
+    if (accent === 'pub') {
+      setFloater({ id: latestSig, value: latestMsg.value, eventName: latestMsg.eventName })
     }
-  }, [latestSig, latestMsg, accent])
+  }
+
+  // Auto-dismiss the floater shortly after it appears.
+  useEffect(() => {
+    if (!floater) return
+    const t = window.setTimeout(() => setFloater((f) => (f && f.id === floater.id ? null : f)), 800)
+    return () => window.clearTimeout(t)
+  }, [floater])
 
   return (
     <div

@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import { eventTypeClass } from '../lib/eventStyles'
 
 export type Stats = {
   total: number
@@ -24,8 +25,19 @@ export function StatsBar({
   const [localDelay, setLocalDelay] = useState(config.subscriberDelayMs)
   const [localChaosInterval, setLocalChaosInterval] = useState(chaos.intervalMs)
 
-  useEffect(() => setLocalDelay(config.subscriberDelayMs), [config.subscriberDelayMs])
-  useEffect(() => setLocalChaosInterval(chaos.intervalMs), [chaos.intervalMs])
+  // Re-sync the sliders when the server-provided values change. Tracks the previous
+  // prop in state and adjusts during render (the React-recommended alternative to a
+  // sync effect) — avoids a cascading re-render; local drags still update immediately.
+  const [prevDelay, setPrevDelay] = useState(config.subscriberDelayMs)
+  if (prevDelay !== config.subscriberDelayMs) {
+    setPrevDelay(config.subscriberDelayMs)
+    setLocalDelay(config.subscriberDelayMs)
+  }
+  const [prevChaosInterval, setPrevChaosInterval] = useState(chaos.intervalMs)
+  if (prevChaosInterval !== chaos.intervalMs) {
+    setPrevChaosInterval(chaos.intervalMs)
+    setLocalChaosInterval(chaos.intervalMs)
+  }
 
   const eventEntries = Object.entries(stats.byEvent).sort((a, b) => b[1] - a[1])
 
@@ -99,12 +111,4 @@ function Stat({ label, value, highlight }: { label: string; value: string; highl
       <div className="stat-value">{value}</div>
     </div>
   )
-}
-
-export function eventTypeClass(eventName: string) {
-  if (eventName.toLowerCase().includes('number')) return 'number'
-  if (eventName.toLowerCase().includes('alphabet')) return 'alphabet'
-  if (eventName.toLowerCase().includes('color')) return 'color'
-  if (eventName.toLowerCase().includes('emoji')) return 'emoji'
-  return 'other'
 }
