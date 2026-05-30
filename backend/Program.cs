@@ -2,18 +2,43 @@ using System.Text.Json;
 using System.Threading.Channels;
 using MessagePipe;
 using PubSubVisualiser.Api.Services;
+using PubSubVisualiser.Api.Services.Messaging;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Allowed browser origins are configurable so the Dockerized frontend (served on a
+// different port) can talk to the API. Defaults cover local Vite dev + the compose frontend.
+var corsOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+    ?? new[] { "http://localhost:5173", "http://localhost:8080" };
 
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy => policy
-        .WithOrigins("http://localhost:5173")
+        .WithOrigins(corsOrigins)
         .AllowAnyHeader()
         .AllowAnyMethod());
 });
 
 builder.Services.AddMessagePipe();
+
+// Message transport selection. "inprocess" (MessagePipe) is the default on-prem
+// transport; future adapters (e.g. "kafka") plug in behind the same IMessageBus.
+var busProvider = builder.Configuration["Bus:Provider"] ?? "inprocess";
+switch (busProvider.ToLowerInvariant())
+{
+    case "inprocess":
+        builder.Services.AddSingleton<IMessageBus, InProcessMessageBus>();
+        break;
+    case "kafka":
+        // Phase 1 seam: a KafkaMessageBus (Confluent.Kafka) will register here so the
+        // same visualiser renders a real broker. Not wired up in this foundation pass.
+        throw new NotImplementedException(
+            "Bus:Provider 'kafka' is not implemented yet (planned for the version/docker Kafka phase).");
+    default:
+        throw new InvalidOperationException(
+            $"Unknown Bus:Provider '{busProvider}'. Supported: inprocess, kafka.");
+}
+
 builder.Services.AddSingleton<Config>();
 
 var publisherDefs = new (string Name, string EventName, Func<string> Generate)[]
@@ -27,7 +52,7 @@ var publisherDefs = new (string Name, string EventName, Func<string> Generate)[]
 foreach (var (name, eventName, generate) in publisherDefs)
 {
     builder.Services.AddSingleton(sp => new Publisher(
-        sp.GetRequiredService<IAsyncPublisher<string, PubSubMessage>>(),
+        sp.GetRequiredService<IMessageBus>(),
         name, eventName, generate));
 }
 
@@ -45,8 +70,7 @@ foreach (var def in subscriberDefs)
 {
     var captured = def;
     builder.Services.AddSingleton<IHostedService>(sp => new Subscriber(
-        sp.GetRequiredService<IAsyncSubscriber<string, PubSubMessage>>(),
-        sp.GetRequiredService<IAsyncPublisher<string, PubSubMessage>>(),
+        sp.GetRequiredService<IMessageBus>(),
         sp.GetRequiredService<Config>(),
         captured.Name, captured.EventNames, captured.ConsumedEventName));
 }
@@ -139,7 +163,7 @@ var sseRoutes = new (string EventName, string Side, string Actor)[]
 
 app.MapGet("/events", async (
     HttpContext ctx,
-    IAsyncSubscriber<string, PubSubMessage> subscriber,
+    IMessageBus bus,
     CancellationToken ct) =>
 {
     ctx.Response.Headers.Append("Content-Type", "text/event-stream");
@@ -157,7 +181,7 @@ app.MapGet("/events", async (
     foreach (var route in sseRoutes)
     {
         var captured = route;
-        var d = subscriber.Subscribe(captured.EventName, (msg, _) =>
+        var d = bus.Subscribe(captured.EventName, (msg, _) =>
         {
             var displayEvent = msg.SourceEventName ?? captured.EventName;
             queue.Writer.TryWrite(new SseEvent(

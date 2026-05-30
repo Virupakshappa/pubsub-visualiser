@@ -1,11 +1,10 @@
-using MessagePipe;
+using PubSubVisualiser.Api.Services.Messaging;
 
 namespace PubSubVisualiser.Api.Services;
 
 public sealed class Subscriber : IHostedService, IDisposable
 {
-    private readonly IAsyncSubscriber<string, PubSubMessage> _subscriber;
-    private readonly IAsyncPublisher<string, PubSubMessage> _publisher;
+    private readonly IMessageBus _bus;
     private readonly Config _config;
     private readonly List<IDisposable> _subscriptions = new();
     private int _count;
@@ -15,15 +14,13 @@ public sealed class Subscriber : IHostedService, IDisposable
     public string ConsumedEventName { get; }
 
     public Subscriber(
-        IAsyncSubscriber<string, PubSubMessage> subscriber,
-        IAsyncPublisher<string, PubSubMessage> publisher,
+        IMessageBus bus,
         Config config,
         string name,
         string[] eventNames,
         string consumedEventName)
     {
-        _subscriber = subscriber;
-        _publisher = publisher;
+        _bus = bus;
         _config = config;
         Name = name;
         EventNames = eventNames;
@@ -36,7 +33,7 @@ public sealed class Subscriber : IHostedService, IDisposable
         {
             var captured = eventName;
             _subscriptions.Add(
-                _subscriber.Subscribe(captured, (msg, ct) => HandleAsync(captured, msg, ct)));
+                _bus.Subscribe(captured, (msg, ct) => HandleAsync(captured, msg, ct)));
         }
         return Task.CompletedTask;
     }
@@ -57,7 +54,7 @@ public sealed class Subscriber : IHostedService, IDisposable
     {
         await Task.Delay(_config.SubscriberDelayMs, ct);
         var count = Interlocked.Increment(ref _count);
-        await _publisher.FireAsync(
+        await _bus.PublishAsync(
             ConsumedEventName,
             new PubSubMessage(count, incoming.Value, sourceEventName),
             ct);

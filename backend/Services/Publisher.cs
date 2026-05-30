@@ -1,10 +1,10 @@
-using MessagePipe;
+using PubSubVisualiser.Api.Services.Messaging;
 
 namespace PubSubVisualiser.Api.Services;
 
 public sealed class Publisher
 {
-    private readonly IAsyncPublisher<string, PubSubMessage> _publisher;
+    private readonly IMessageBus _bus;
     private readonly Func<string> _generator;
     private int _count;
 
@@ -12,12 +12,12 @@ public sealed class Publisher
     public string EventName { get; }
 
     public Publisher(
-        IAsyncPublisher<string, PubSubMessage> publisher,
+        IMessageBus bus,
         string name,
         string eventName,
         Func<string> generator)
     {
-        _publisher = publisher;
+        _bus = bus;
         Name = name;
         EventName = eventName;
         _generator = generator;
@@ -27,6 +27,6 @@ public sealed class Publisher
     {
         var value = _generator();
         var count = Interlocked.Increment(ref _count);
-        await _publisher.FireAsync(EventName, new PubSubMessage(count, value), ct);
+        await _bus.PublishAsync(EventName, new PubSubMessage(count, value), ct);
     }
 }

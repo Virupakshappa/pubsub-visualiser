@@ -6,7 +6,7 @@ import { WiringLayer, type WiringEdge } from './components/WiringLayer'
 import { StatsBar, eventTypeClass } from './components/StatsBar'
 import { ArchitectureDiagram } from './components/ArchitectureDiagram'
 
-const API = 'http://localhost:5080'
+const API = import.meta.env.VITE_API_URL ?? 'http://localhost:5080'
 const MAX_HISTORY = 8
 const STATS_WINDOW_MS = 1000
 const EVENT_LOG_MAX = 400

@@ -1,4 +1,4 @@
-using MessagePipe;
+using PubSubVisualiser.Api.Services.Messaging;
 
 namespace PubSubVisualiser.Api.Services;
 
@@ -7,8 +7,7 @@ public sealed class FailingSubscriber : IHostedService, IDisposable
     private const double FailureRate = 0.30;
     private const int MaxAttempts = 3;
 
-    private readonly IAsyncSubscriber<string, PubSubMessage> _subscriber;
-    private readonly IAsyncPublisher<string, PubSubMessage> _publisher;
+    private readonly IMessageBus _bus;
     private readonly Config _config;
     private readonly List<IDisposable> _subscriptions = new();
     private int _count;
@@ -23,13 +22,9 @@ public sealed class FailingSubscriber : IHostedService, IDisposable
     };
     public string ConsumedEventName { get; } = Services.EventNames.ChaoticConsumed;
 
-    public FailingSubscriber(
-        IAsyncSubscriber<string, PubSubMessage> subscriber,
-        IAsyncPublisher<string, PubSubMessage> publisher,
-        Config config)
+    public FailingSubscriber(IMessageBus bus, Config config)
     {
-        _subscriber = subscriber;
-        _publisher = publisher;
+        _bus = bus;
         _config = config;
     }
 
@@ -39,7 +34,7 @@ public sealed class FailingSubscriber : IHostedService, IDisposable
         {
             var captured = eventName;
             _subscriptions.Add(
-                _subscriber.Subscribe(captured, (msg, ct) => HandleAsync(captured, msg, ct)));
+                _bus.Subscribe(captured, (msg, ct) => HandleAsync(captured, msg, ct)));
         }
         return Task.CompletedTask;
     }
@@ -67,7 +62,7 @@ public sealed class FailingSubscriber : IHostedService, IDisposable
                 if (attempt == MaxAttempts)
                 {
                     var failedCount = Interlocked.Increment(ref _count);
-                    await _publisher.FireAsync(
+                    await _bus.PublishAsync(
                         ConsumedEventName,
                         new PubSubMessage(failedCount, incoming.Value, sourceEventName, attempt, Failed: true),
                         ct);
@@ -78,7 +73,7 @@ public sealed class FailingSubscriber : IHostedService, IDisposable
             }
 
             var count = Interlocked.Increment(ref _count);
-            await _publisher.FireAsync(
+            await _bus.PublishAsync(
                 ConsumedEventName,
                 new PubSubMessage(count, incoming.Value, sourceEventName, attempt, Failed: false),
                 ct);

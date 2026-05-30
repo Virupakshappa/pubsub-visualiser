@@ -82,6 +82,37 @@ npm run dev
 
 Open <http://localhost:5173>. Click **⚡ Publish all**, flip on **Chaos**, and toggle **⬡ Architecture**.
 
+### Run with Docker
+
+```bash
+docker compose up --build
+```
+
+Then open <http://localhost:8080> (the API is published on `localhost:5080`). The
+backend and frontend each build from their own multi-stage `Dockerfile`; the frontend
+is served by nginx with the API URL baked in via the `VITE_API_URL` build arg.
+
+## Message transport
+
+The backend talks to its bus through a single `IMessageBus` seam
+([`Services/Messaging`](backend/Services/Messaging/)), selected at startup via the
+`Bus:Provider` config key:
+
+| Provider | Status | Notes |
+|----------|--------|-------|
+| `inprocess` *(default)* | ✅ | MessagePipe in-process bus — no network, no durability |
+| `kafka` | 🚧 planned | Real broker adapter (Confluent.Kafka); same particles, real topics |
+
+Publishers, subscribers, and the SSE endpoint all depend only on `IMessageBus`, so
+swapping the transport doesn't touch the visualiser.
+
+## Branches
+
+| Branch | What it is |
+|--------|-----------|
+| `version/on-prem` | The original in-process-only version (no Docker, no transport seam) |
+| `version/docker` | Containerised version with the `IMessageBus` abstraction; target for the real-broker + observability roadmap |
+
 ## API
 
 | Method | Route | Description |

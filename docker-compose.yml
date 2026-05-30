@@ -1,0 +1,50 @@
+# Pub/Sub Visualiser — foundation compose (version/docker).
+# Runs the .NET backend (in-process MessagePipe bus) + the React frontend served by nginx.
+#
+# Quickstart:
+#   docker compose up --build
+#   open http://localhost:8080
+#
+# The browser talks to the API directly (SSE + fetch), so the frontend is built with
+# VITE_API_URL pointing at the host-published backend port, and the backend's CORS
+# allow-list includes the frontend origin.
+
+services:
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "5080:8080"
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      Bus__Provider: inprocess
+      # CORS allow-list (array binding via __<index>).
+      Cors__AllowedOrigins__0: http://localhost:8080
+      Cors__AllowedOrigins__1: http://localhost:5173
+    networks:
+      - pubsub
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # Baked into the bundle at build time; must be reachable from the host browser.
+        VITE_API_URL: http://localhost:5080
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    networks:
+      - pubsub
+
+  # ---- Phase 1 seam: real broker ----
+  # The Kafka phase will add a broker service here (Confluent.Kafka, KRaft mode) and
+  # switch the backend to Bus__Provider=kafka. Left intentionally unconfigured for now.
+  #
+  # kafka:
+  #   image: confluentinc/cp-kafka:7.6.1
+  #   ...
+
+networks:
+  pubsub:
+    driver: bridge
