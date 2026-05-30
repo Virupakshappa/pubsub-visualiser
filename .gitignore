@@ -22,3 +22,7 @@ pnpm-debug.log*
 !.vscode/extensions.json
 .idea/
 *.swp
+
+# ---- Local agent tooling (ruflo / claude-flow — global to the machine, not the repo) ----
+.claude/
+.claude-flow/
